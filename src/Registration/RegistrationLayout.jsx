@@ -2,54 +2,42 @@ import React from 'react';
 import style from './RegistrationLayout.module.css';
 
 function RegistrationLayout({
-	formData,
 	onSubmit,
-	onChange,
-	showError,
+	handleSubmit,
+	register,
 	errors,
 	isValid,
-	submitButtonRef,
-	cleanForm,
-	touched,
+	reset,
 }) {
 	return (
 		<div className={style.content}>
 			<h2> Registration </h2>
-			<form onSubmit={onSubmit}>
-				{touched.login && showError('login') && <p>{errors.login}</p>}
+			<form onSubmit={handleSubmit(onSubmit)}>
+				{errors.login?.message && <p>{errors.login?.message}</p>}
+				<input {...register('login')} type="text" placeholder="Login" required />
+				{errors.password?.message && <p>{errors.password.message}</p>}
 				<input
-					type="text"
-					name="login"
-					value={formData.login}
-					placeholder="Login"
-					onChange={onChange}
-				></input>
-				{touched.password && showError('password') && <p>{errors.password}</p>}
-				<input
+					{...register('password')}
 					type="password"
-					name="password"
-					value={formData.password}
 					placeholder="Password"
-					onChange={onChange}
-				></input>
-				{touched.password2 && showError('password2') && <p>{errors.password2}</p>}
+					required
+				/>
+				{errors.password2?.message && <p>{errors.password2?.message}</p>}
 				<input
+					{...register('password2')}
 					type="password"
-					name="password2"
-					value={formData.password2}
-					placeholder="Repeat password"
-					onChange={onChange}
-				></input>
+					placeholder="Repead password"
+					required
+				/>
 				<button
 					type="submit"
 					className={isValid ? style.sendForm : style.sendFormDisabled}
 					disabled={!isValid}
-					ref={submitButtonRef}
 				>
 					signup
 				</button>
-				<button type="button" className={style.clear} onClick={cleanForm}>
-					clear
+				<button type="button" className={style.clear} onClick={reset}>
+					clean
 				</button>
 			</form>
 		</div>

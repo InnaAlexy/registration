@@ -1,23 +1,11 @@
-const validateRules = {
-	required: (value) => Boolean(value.trim()),
-	minLength: (value, params) => value.length > params,
-	match: (value, params) => value === params,
-};
+import * as Yup from 'yup';
 
-export const validate = (data, config) => {
-	const errors = {};
-	for (const value in data) {
-		const rules = config[value];
-		for (const rule in rules) {
-			const { message, params } = rules[rule];
-			const validator = validateRules[rule];
-			const hasError = validator && !validator(data[value], params);
-
-			if (hasError) {
-				errors[value] = message;
-				break;
-			}
-		}
-	}
-	return errors;
-};
+export const formSchema = Yup.object().shape({
+	login: Yup.string().required('Login is required'),
+	password: Yup.string()
+		.required('Password is required')
+		.min(3, 'Password less then 3 characters long'),
+	password2: Yup.string()
+		.required('Reapid the password')
+		.oneOf([Yup.ref('password')], 'Passwords did not match'),
+});
