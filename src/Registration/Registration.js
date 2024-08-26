@@ -1,68 +1,75 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import style from './Registration.module.css';
 import RegistrationLayout from './RegistrationLayout';
-import { initialState } from '../initialState';
+import { initialState, initialTouchState } from '../initialState';
+import { validate } from '../Validate';
 
 function Registration() {
 	const [formData, setFormData] = useState(initialState);
-	const [loginErrors, setLoginErrors] = useState('');
-	const [passwordMatchErrors, setPasswordMatchErrors] = useState('');
+	const [errors, setErrors] = useState({});
+	const [touched, setTouched] = useState(initialTouchState);
+
+	const isValid = Object.keys(errors).length === 0;
 	const submitButtonRef = useRef(null);
-	let isValid = false;
 
-	if (loginErrors === null && passwordMatchErrors === null) {
-		isValid = true;
-		console.log(loginErrors === null && passwordMatchErrors === null);
-	} else {
-		isValid = false;
-	}
-
-	const validateLogin = (value) => {
-		let logError = null;
-		if (!/^[\w_]*$/.test(value)) {
-			logError = 'use letters, numbers, or _';
-		} else if (value.length > 20) {
-			logError = 'maximum of 20 characters';
-		}
-		setLoginErrors(logError);
-	};
-
-	const passwordMatch = (value) => {
-		let matchError = null;
-		if (value !== formData.password) {
-			matchError = 'passwords did not match';
-		} else {
-			submitButtonRef.current.focus();
-		}
-		setPasswordMatchErrors(matchError);
-	};
-
-	function onChange(event) {
-		const { name, value } = event.target;
-		if (name === 'login') {
-			validateLogin(value);
-		}
-
-		if (name === 'password2') {
-			passwordMatch(value);
-		}
-
-		setFormData((prevState) => ({ ...prevState, [name]: value }));
-	}
-
-	const sendData = (fieldState) => {
-		console.log(fieldState);
+	const cleanForm = () => {
+		setFormData(initialState);
+		setErrors({});
+		setTouched(initialTouchState);
 	};
 
 	const onSubmit = (event) => {
 		event.preventDefault();
-		sendData(formData);
+		if (isValid) {
+			console.log(formData);
+			cleanForm();
+		}
 	};
 
-	const clianForm = () => {
-		setFormData(initialState);
-		setLoginErrors([]);
-		setPasswordMatchErrors([]);
+	const onChange = (event) => {
+		const { name, value } = event.target;
+		setFormData((prevState) => ({ ...prevState, [name]: value }));
+		if (!touched[name]) {
+			setTouched((prevState) => ({ ...prevState, [name]: true }));
+		}
+	};
+
+	const validateShema = {
+		login: {
+			required: {
+				message: 'Login is required',
+			},
+		},
+		password: {
+			minLength: {
+				message: 'Password less then 3 characters long',
+				params: 3,
+			},
+		},
+		password2: {
+			required: {
+				message: 'Reapid the password',
+			},
+			match: {
+				message: 'Passwords did not match',
+				params: `${formData.password}`,
+			},
+		},
+	};
+
+	useEffect(() => {
+		if (isValid) {
+			submitButtonRef.current.focus();
+		}
+	}, [isValid]);
+
+	useEffect(() => {
+		const errors = validate(formData, validateShema);
+		setErrors(errors);
+	}, [formData]);
+
+	const showError = (name) => {
+		return errors[name];
 	};
 
 	return (
@@ -70,12 +77,13 @@ function Registration() {
 			<RegistrationLayout
 				formData={formData}
 				onChange={onChange}
-				clianForm={clianForm}
 				onSubmit={onSubmit}
-				loginErrors={loginErrors}
-				passwordMatchErrors={passwordMatchErrors}
+				showError={showError}
+				errors={errors}
 				isValid={isValid}
 				submitButtonRef={submitButtonRef}
+				cleanForm={cleanForm}
+				touched={touched}
 			/>
 		</div>
 	);

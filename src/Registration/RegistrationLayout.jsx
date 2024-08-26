@@ -5,17 +5,18 @@ function RegistrationLayout({
 	formData,
 	onSubmit,
 	onChange,
-	clianForm,
-	loginErrors,
-	passwordMatchErrors,
+	showError,
+	errors,
 	isValid,
 	submitButtonRef,
+	cleanForm,
+	touched,
 }) {
 	return (
 		<div className={style.content}>
 			<h2> Registration </h2>
 			<form onSubmit={onSubmit}>
-				<div> {loginErrors} </div>
+				{touched.login && showError('login') && <p>{errors.login}</p>}
 				<input
 					type="text"
 					name="login"
@@ -23,7 +24,7 @@ function RegistrationLayout({
 					placeholder="Login"
 					onChange={onChange}
 				></input>
-				<div>{passwordMatchErrors}</div>
+				{touched.password && showError('password') && <p>{errors.password}</p>}
 				<input
 					type="password"
 					name="password"
@@ -31,6 +32,7 @@ function RegistrationLayout({
 					placeholder="Password"
 					onChange={onChange}
 				></input>
+				{touched.password2 && showError('password2') && <p>{errors.password2}</p>}
 				<input
 					type="password"
 					name="password2"
@@ -46,7 +48,7 @@ function RegistrationLayout({
 				>
 					signup
 				</button>
-				<button type="button" onClick={clianForm} className={style.clear}>
+				<button type="button" className={style.clear} onClick={cleanForm}>
 					clear
 				</button>
 			</form>
